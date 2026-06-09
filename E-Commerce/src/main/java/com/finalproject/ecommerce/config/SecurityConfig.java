@@ -1,0 +1,68 @@
+package com.finalproject.ecommerce.config;
+
+import com.finalproject.ecommerce.security.JwtAuthFilter;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity
+@RequiredArgsConstructor
+public class SecurityConfig {
+
+	private final JwtAuthFilter jwtAuthFilter;
+
+	@Bean
+	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+		http
+				.csrf(AbstractHttpConfigurer::disable)
+				.cors(cors -> {})
+				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.authorizeHttpRequests(auth -> auth
+						.requestMatchers("/api/auth/**").permitAll()
+						.requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
+						.requestMatchers(HttpMethod.GET, "/api/categories").permitAll()
+						.requestMatchers(HttpMethod.POST, "/api/contact").permitAll()
+						.requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
+						.requestMatchers("/api/cart/**").hasAnyRole("USER", "ADMIN")
+						.requestMatchers(HttpMethod.POST, "/api/orders/checkout").hasAnyRole("USER", "ADMIN")
+						.requestMatchers(HttpMethod.GET, "/api/orders/my").hasAnyRole("USER", "ADMIN")
+						.requestMatchers(HttpMethod.POST, "/api/products").hasRole("ADMIN")
+						.requestMatchers(HttpMethod.PUT, "/api/products/**").hasRole("ADMIN")
+						.requestMatchers(HttpMethod.DELETE, "/api/products/**").hasRole("ADMIN")
+						.requestMatchers(HttpMethod.POST, "/api/categories").hasRole("ADMIN")
+						.requestMatchers(HttpMethod.PUT, "/api/categories/**").hasRole("ADMIN")
+						.requestMatchers(HttpMethod.DELETE, "/api/categories/**").hasRole("ADMIN")
+						.requestMatchers(HttpMethod.GET, "/api/orders").hasRole("ADMIN")
+						.requestMatchers(HttpMethod.PUT, "/api/orders/**").hasRole("ADMIN")
+						.requestMatchers(HttpMethod.GET, "/api/contact").hasRole("ADMIN")
+						.anyRequest().authenticated()
+				)
+				.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
+		return http.build();
+	}
+
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
+
+	@Bean
+	public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+		return config.getAuthenticationManager();
+	}
+}
