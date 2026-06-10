@@ -124,6 +124,7 @@ public class CartServiceImpl implements CartService {
 			BigDecimal subtotal = item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
 			return CartItemResponse.builder()
 					.id(item.getId())
+					.itemId(item.getId())
 					.productId(item.getProduct().getId())
 					.productName(item.getProduct().getName())
 					.imageUrl(item.getProduct().getImageUrl())

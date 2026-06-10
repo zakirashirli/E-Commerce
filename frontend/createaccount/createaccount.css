@@ -1,0 +1,17 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+input.create{
+    width: 355px;
+    height: 30px;
+}
+button.btn-create{
+    width: 355px;
+    padding: 5px 10px;
+}
+
+span{
+    font-size: 15px;
+}

@@ -1,0 +1,13 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+input.form-control{
+    width: 350px;
+    height: 30px;
+}
+button.btn-login{
+    width: 350px;
+    padding: 5px 10px;
+}

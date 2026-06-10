@@ -16,6 +16,7 @@ import com.finalproject.ecommerce.security.JwtService;
 import com.finalproject.ecommerce.service.interfaces.AuthService;
 import com.finalproject.ecommerce.service.interfaces.EmailService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -37,6 +38,9 @@ public class AuthServiceImpl implements AuthService {
 	private final AuthenticationManager authenticationManager;
 	private final EmailService emailService;
 
+	@Value("${app.auth.auto-verify:false}")
+	private boolean autoVerify;
+
 	@Override
 	@Transactional
 	public String register(RegisterRequest request) {
@@ -54,18 +58,20 @@ public class AuthServiceImpl implements AuthService {
 				.email(request.getEmail())
 				.password(passwordEncoder.encode(request.getPassword()))
 				.role(Role.USER)
-				.enabled(false)
+				.enabled(autoVerify)
 				.build();
 		userRepository.save(user);
 
+		if (autoVerify) {
+			return "Registration successful. You can now log in.";
+		}
+
 		String otp = generateOtp();
-		OtpCode otpCode = OtpCode.builder()
+		otpCodeRepository.save(OtpCode.builder()
 				.email(request.getEmail())
 				.code(otp)
 				.expiresAt(LocalDateTime.now().plusMinutes(10))
-				.build();
-		otpCodeRepository.save(otpCode);
-
+				.build());
 		emailService.sendOtp(request.getEmail(), otp);
 		return "Registration successful. Please verify your email with the OTP sent.";
 	}
@@ -129,6 +135,8 @@ public class AuthServiceImpl implements AuthService {
 		return AuthResponse.builder()
 				.token(token)
 				.userId(user.getId())
+				.name(user.getName())
+				.surname(user.getSurname())
 				.username(user.getUsername())
 				.email(user.getEmail())
 				.role(user.getRole())

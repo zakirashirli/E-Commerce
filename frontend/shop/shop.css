@@ -1,0 +1,9 @@
+.stars {
+    color: gold;
+    font-size: 18px;
+}
+
+.rating-value {
+    font-weight: bold;
+    margin-left: 5px;
+}
