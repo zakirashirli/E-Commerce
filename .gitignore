@@ -1,0 +1,7 @@
+.idea/
+_review_*/
+**/target/
+**/data/*.mv.db
+**/data/*.trace.db
+**/uploads/
+*.log

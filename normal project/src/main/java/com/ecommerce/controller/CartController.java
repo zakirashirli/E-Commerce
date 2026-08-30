@@ -1,0 +1,4 @@
+package com.ecommerce.controller;
+import com.ecommerce.dto.ApiDtos.*; import com.ecommerce.service.CartService; import jakarta.validation.Valid; import org.springframework.security.core.Authentication; import org.springframework.web.bind.annotation.*; import java.util.List;
+@RestController @RequestMapping("/api/cart")
+public class CartController {private final CartService service;public CartController(CartService s){service=s;}@GetMapping List<CartResponse> list(Authentication a){return service.list(a.getName());}@PostMapping CartResponse add(Authentication a,@Valid @RequestBody CartRequest r){return service.add(a.getName(),r);}@PutMapping("/{id}")CartResponse update(Authentication a,@PathVariable Long id,@RequestParam int quantity){return service.update(a.getName(),id,quantity);}@DeleteMapping("/{id}")void delete(Authentication a,@PathVariable Long id){service.delete(a.getName(),id);}}
